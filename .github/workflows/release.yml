@@ -30,8 +30,8 @@ jobs:
 
       - name: Clone LLVM
         uses: actions/checkout@v7
-        repository: llvm/llvm-project
         with:
+          repository: llvm/llvm-project
           path: llvm-project
           ref: ${{ inputs.llvm-branch }}
 
