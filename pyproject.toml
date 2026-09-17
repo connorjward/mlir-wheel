@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "firedrake-mlir"
-version = "0.0.1"
+version = "hello there"
 description = "A pre-compiled MLIR binary available as a Python wheel"
 readme = "README.md"
 authors = [

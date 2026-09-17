@@ -3,58 +3,47 @@ name: Publish release
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: The branch to release from
+      llvm-branch:
+        description: The LLVM branch to release from
         type: string
         required: true
       version:
         description: The version number to release
         type: string
         required: true
+      python-version:
+        description: The Python version to build the wheel for
+        type: string
+        required: true
 
 jobs:
-  check:
-    name: Pre-release checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.branch }}
-
-      - name: Check no 'TODO RELEASE' comments remain
-        run: |
-          if [ -z "$( grep -r --exclude-dir='.*' 'TODO RELEASE' )" ]; then
-            exit 0
-          else
-            exit 1
-          fi
-
-      - name: Check version number matches
-        run: |
-          if [ -z "$( grep 'version = \"${{ inputs.version }}\"' pyproject.toml )" ]; then
-            exit 1
-          else
-            exit 0
-          fi
-
   build:
     name: Build dist files
-    needs: check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # TODO: [self-hosted, Linux]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
+      - name: Set version in pyproject.toml
+        run:
+          sed -i 's/VERSION/"${{ inputs.version }}"/' pyproject.toml
+          cat pyproject.toml
+
+      - name: Clone LLVM
+        uses: actions/checkout@v7
+        repository: llvm/llvm-project
         with:
-          ref: ${{ inputs.branch }}
+          path: llvm-project
+          ref: ${{ inputs.llvm-branch }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ inputs.python-version }}
 
-      - name: Build libsupermesh
+      - name: Build wheel
         run: |
           pip install build
-          python -m build --sdist --verbose .
+          SKBUILD_CMAKE_SOURCE_DIR=llvm-project/llvm python -m build --wheel --verbose .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -62,39 +51,40 @@ jobs:
           name: dist
           path: dist/
 
-  pypi:
-    name: Push dist to PyPI
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: release
-    permissions:
-      id-token: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  # pypi:
+  #   name: Push dist to PyPI
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: release
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - name: Download artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: dist
+  #         path: dist/
+  #
+  #     - name: Publish to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
 
   github_release:
     name: Create GitHub release
-    needs: pypi
+    # needs: pypi
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
 
-      - name: Create release
+      - name: Upload wheel
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create --title ${{ inputs.version }} --target ${{ inputs.branch }} --generate-notes ${{ inputs.version }} dist/*
+        run: gh release upload --clobber 2026.0 dist/*
