@@ -1,0 +1,24 @@
+[build-system]
+requires = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "firedrake-mlir"
+version = "0.0.1"
+description = "A pre-compiled MLIR binary available as a Python wheel"
+readme = "README.md"
+authors = [
+  {name = "Connor Ward", email = "c.ward20@imperial.ac.uk"},
+]
+
+[tool.scikit-build]
+build-dir = "build"
+wheel.install-dir = "mlir"
+
+[tool.scikit-build.cmake.define]
+LLVM_ENABLE_PROJECTS = "mlir"
+LLVM_TARGETS_TO_BUILD = "Native"
+
+[tool.scikit-build.wheel.force-include]
+"build/bin/mlir-opt" = "${SKBUILD_SCRIPTS_DIR}/mlir-opt"
+"build/bin/mlir-translate" = "${SKBUILD_SCRIPTS_DIR}/mlir-translate"
