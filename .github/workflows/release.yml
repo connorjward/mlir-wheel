@@ -91,7 +91,7 @@ jobs:
         if: !inputs.modify-existing-release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create ${{ inputs.version }} dist/*
+        run: gh release create --title ${{ inputs.version }} ${{ inputs.version }} dist/*
 
       - name: Update existing release
         if: inputs.modify-existing-release
