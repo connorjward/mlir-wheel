@@ -24,7 +24,14 @@ jobs:
   build:
     name: Build dist files
     runs-on: [self-hosted, Linux]
+    container:
+      image: ubuntu:latest
     steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get -y install clang cmake git lld
+
       - uses: actions/checkout@v7
 
       - name: Set up Python
