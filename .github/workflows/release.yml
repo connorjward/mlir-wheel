@@ -21,40 +21,8 @@ on:
         required: true
 
 jobs:
-  first:
-    name: debugging
-    runs-on: ubuntu-latest
-    steps:
-      - name: a
-        if: inputs.modify-existing-release == 'true'
-        run: echo true
-
-      - name: b
-        if: inputs.modify-existing-release == 'false'
-        run: echo false
-
-      - name: bb
-        if: inputs.modify-existing-release
-        run: echo false
-
-      - name: bbb
-        if: ! inputs.modify-existing-release
-        run: echo false
-
-      - name: bbbb
-        if: inputs.modify-existing-release == true
-        run: echo false
-
-      - name: bbbb
-        if: inputs.modify-existing-release == false
-        run: echo false
-
-      - name: c
-        run: exit 1
-
   build:
     name: Build dist files
-    needs: first
     runs-on: [self-hosted, Linux]
     steps:
       - uses: actions/checkout@v7
@@ -120,13 +88,13 @@ jobs:
           path: dist/
 
       - name: Create new release
-        if: inputs.modify-existing-release == 'false'
+        if: inputs.modify-existing-release == false
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create --title ${{ inputs.version }} ${{ inputs.version }} dist/*
 
       - name: Update existing release
-        if: inputs.modify-existing-release == 'true'
+        if: inputs.modify-existing-release == true
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload --clobber ${{ inputs.version }} dist/*
