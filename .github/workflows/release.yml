@@ -18,7 +18,6 @@ on:
       modify-existing-release:
         description: Whether the release already exists
         type: bool
-        required: true
 
 jobs:
   build:
