@@ -33,6 +33,22 @@ jobs:
         if: inputs.modify-existing-release == 'false'
         run: echo false
 
+      - name: bb
+        if: inputs.modify-existing-release
+        run: echo false
+
+      - name: bbb
+        if: ! inputs.modify-existing-release
+        run: echo false
+
+      - name: bbbb
+        if: inputs.modify-existing-release == true
+        run: echo false
+
+      - name: bbbb
+        if: inputs.modify-existing-release == false
+        run: echo false
+
       - name: c
         run: exit 1
 
