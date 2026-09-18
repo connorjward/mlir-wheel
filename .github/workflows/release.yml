@@ -26,6 +26,7 @@ jobs:
     runs-on: [self-hosted, Linux]
     container:
       image: ubuntu:latest
+
     steps:
       - name: Install system dependencies
         run: |
@@ -52,9 +53,14 @@ jobs:
           ref: ${{ inputs.llvm-branch }}
 
       - name: Build wheel
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 8
+          SKBUILD_CMAKE_SOURCE_DIR: llvm-project/llvm
+          SKBUILD_CMAKE_ARGS: -DCMAKE_C_COMPILER=clang;-DCMAKE_CXX_COMPILER=clang++;-DLLVM_ENABLE_LLD=ON
+
         run: |
           pip install build
-          CMAKE_BUILD_PARALLEL_LEVEL=8 SKBUILD_CMAKE_SOURCE_DIR=llvm-project/llvm python -m build --wheel --verbose .
+          python -m build --wheel --verbose .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
