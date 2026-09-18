@@ -6,7 +6,7 @@ build-backend = "scikit_build_core.build"
 name = "firedrake-mlir"
 # This gets replaced by sed in the workflow with the right thing
 version = VERSION
-description = "A pre-compiled MLIR binary available as a Python wheel"
+description = "A compiled MLIR binary available as a Python wheel"
 readme = "README.md"
 authors = [
   {name = "Connor Ward", email = "c.ward20@imperial.ac.uk"},
